@@ -1,4 +1,5 @@
 var Sequelize = require('sequelize');
+var path = require('path')
 
 const dbConnection = new Sequelize(
     "auth",
@@ -6,10 +7,16 @@ const dbConnection = new Sequelize(
     null,
     {
         dialect: "sqlite",
-        storage:"auth.db",
+        storage: path.resolve(__dirname, "auth.db"),
         pool:{
             idle:1000,
             max:10
+        },
+        define: {
+            timestamps: false
+        },
+        sync: {
+            force: true
         }
     }
 )
