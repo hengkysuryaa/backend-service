@@ -1,0 +1,11 @@
+version: '3'
+services:
+  auth-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nodejs
+    container_name: auth-app
+    env_file: .env
+    ports:
+      - "8081:8081"
