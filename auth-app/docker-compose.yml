@@ -7,5 +7,7 @@ services:
     image: nodejs
     container_name: auth-app
     env_file: .env
+    volumes:
+      - ./db:/usr/src/app/db
     ports:
       - "8081:8081"
