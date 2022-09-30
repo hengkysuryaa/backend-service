@@ -2,6 +2,7 @@ const { Sequelize } = require("sequelize")
 const User = require("../models/user")
 const crypto = require("crypto")
 const bcrypt = require("../library/bcrypt")
+const jwt = require("../library/jwt")
 
 exports.registerUser = async (req) => {
     try {
@@ -34,6 +35,41 @@ exports.registerUser = async (req) => {
         return {"user":userDetail, "message":null}
         
     } catch(err) {
+        throw err
+    }
+}
+
+exports.login = async (req) => {
+    try {
+        // find user
+        var user = await User.findOne({
+            where:{ phone:req.phone }
+        })
+
+        if (user == null) {
+            return {"token":null, "error_message":"User not found. Please register"}
+        }
+
+        // check password
+        const isValid = await bcrypt.decrypt(req.password, user.password)
+        if (!isValid) {
+            return {"token":null, "error_message":"Incorrect password. Please try again"}
+        }
+
+        var data = {
+            name:user.name,
+            phone:user.phone,
+            role:user.role,
+            registered_at:user.created_at
+        }
+
+        // generate jwt token
+        var token = await jwt.sign(data)
+
+        return {"token":token, "error_message":null}
+
+    } catch(err) {
+        console.log(err)
         throw err
     }
 }
