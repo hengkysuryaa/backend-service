@@ -26,6 +26,7 @@ func NewRouter(
 
 		r.Route("/orders", func(r chi.Router) {
 			r.Get("/", middleware.AuthorizeAll(orderHandlers.GetAll))
+			r.Get("/summary", middleware.AuthorizeAdmin(orderHandlers.GetSummary))
 		})
 	})
 
