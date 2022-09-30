@@ -6,14 +6,26 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 
+	"github.com/hengkysuryaa/backend-service/fetch-app/internal/domain/repository/web_repo"
+	orderUsecase "github.com/hengkysuryaa/backend-service/fetch-app/internal/domain/usecase/order"
 	"github.com/hengkysuryaa/backend-service/fetch-app/internal/ports/rest"
+	orderHandler "github.com/hengkysuryaa/backend-service/fetch-app/internal/ports/rest/handlers"
 )
 
 func RunRest() {
 	restPort := os.Getenv("REST_PORT")
+	resourceURL := os.Getenv("RESOURCE_URL")
+	httpClient := &http.Client{
+		Timeout: time.Second * 10,
+	}
 
-	r := rest.NewRouter()
+	webRepo := web_repo.New(httpClient, resourceURL)
+	orderUsecase := orderUsecase.New(webRepo)
+	orderHandlers := orderHandler.NewOrderHandler(orderUsecase)
+
+	r := rest.NewRouter(orderHandlers)
 	s := http.Server{
 		Addr:    restPort,
 		Handler: r,
