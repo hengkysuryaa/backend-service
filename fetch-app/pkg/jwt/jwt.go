@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 	"log"
+	"os"
 
 	jwt "github.com/golang-jwt/jwt/v4"
 )
-
-const JWT_SIGNATURE_KEY = "H31kR4l3J4JMsLDpJsMlpcY6kqAqNBKQ8A4u91lhuJsVOOVGkfZYXaP2R3MjskWn"
 
 var (
 	TokenDataKey = &contextKey{"token-data"}
@@ -19,6 +18,8 @@ type contextKey struct {
 }
 
 func ReadToken(ctx context.Context, tokenString string) (context.Context, error) {
+	JWT_SIGNATURE_KEY := os.Getenv("JWT_SIGNATURE_KEY")
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("signing method invalid")

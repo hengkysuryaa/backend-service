@@ -10,12 +10,12 @@ import (
 	"github.com/hengkysuryaa/backend-service/fetch-app/internal/ports/rest"
 )
 
-const REST_PORT = ":8080"
-
 func RunRest() {
+	restPort := os.Getenv("REST_PORT")
+
 	r := rest.NewRouter()
 	s := http.Server{
-		Addr:    REST_PORT,
+		Addr:    restPort,
 		Handler: r,
 	}
 
@@ -38,7 +38,7 @@ func RunRest() {
 		cleanupChan <- true
 	}()
 
-	log.Println("Rest server started on", REST_PORT, "port")
+	log.Println("Rest server started on", restPort, "port")
 
 	if err := s.ListenAndServe(); err != http.ErrServerClosed {
 		defer os.Exit(1)
