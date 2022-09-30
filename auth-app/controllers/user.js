@@ -27,3 +27,7 @@ exports.Login = async (req, res) => {
         return res.status(500).send({"message":err.message})
     }
 }
+
+exports.GetTokenInfo = async (req, res) => {
+    return res.status(200).send({"user":req.decodedToken})
+}
