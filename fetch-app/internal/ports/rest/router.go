@@ -5,10 +5,13 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/hengkysuryaa/backend-service/fetch-app/internal/ports/rest/handlers"
 	"github.com/hengkysuryaa/backend-service/fetch-app/internal/ports/rest/middleware"
 )
 
-func NewRouter() *chi.Mux {
+func NewRouter(
+	orderHandlers *handlers.OrderHandlers,
+) *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Route("/fetch-app", func(r chi.Router) {
@@ -20,6 +23,11 @@ func NewRouter() *chi.Mux {
 				}
 			}),
 		)
+
+		r.Route("/orders", func(r chi.Router) {
+			r.Get("/", middleware.AuthorizeAll(orderHandlers.GetAll))
+		})
 	})
+
 	return router
 }
