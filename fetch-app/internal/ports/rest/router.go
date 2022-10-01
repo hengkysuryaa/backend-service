@@ -11,6 +11,7 @@ import (
 
 func NewRouter(
 	orderHandlers *handlers.OrderHandlers,
+	currencyConverterHandlers *handlers.CurrencyConverterHandlers,
 ) *chi.Mux {
 	router := chi.NewRouter()
 
@@ -27,6 +28,10 @@ func NewRouter(
 		r.Route("/orders", func(r chi.Router) {
 			r.Get("/", middleware.AuthorizeAll(orderHandlers.GetAll))
 			r.Get("/summary", middleware.AuthorizeAdmin(orderHandlers.GetSummary))
+		})
+
+		r.Route("/currency-converter", func(r chi.Router) {
+			r.Get("/", middleware.AuthorizeAll(currencyConverterHandlers.ConvertCurrency))
 		})
 	})
 
