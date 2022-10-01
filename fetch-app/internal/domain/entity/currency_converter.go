@@ -1,5 +1,8 @@
 package entity
 
+var CURRENCY_CONVERSION_BASE_KEY = "currency-conversion:"
+var CACHE_EXPIRED_IN_HOUR = 2
+
 type CurrencyConverter struct {
 	Date       string `json:"date"`
 	Historical string `json:"historical"`
