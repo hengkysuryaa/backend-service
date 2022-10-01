@@ -9,23 +9,36 @@ import (
 	"time"
 
 	"github.com/hengkysuryaa/backend-service/fetch-app/internal/domain/repository/web_repo"
+	currencyConverterUsecase "github.com/hengkysuryaa/backend-service/fetch-app/internal/domain/usecase/currency_converter"
 	orderUsecase "github.com/hengkysuryaa/backend-service/fetch-app/internal/domain/usecase/order"
 	"github.com/hengkysuryaa/backend-service/fetch-app/internal/ports/rest"
-	orderHandler "github.com/hengkysuryaa/backend-service/fetch-app/internal/ports/rest/handlers"
+	"github.com/hengkysuryaa/backend-service/fetch-app/internal/ports/rest/handlers"
+	"github.com/hengkysuryaa/backend-service/fetch-app/pkg/cache"
 )
 
 func RunRest() {
 	restPort := os.Getenv("REST_PORT")
 	resourceURL := os.Getenv("RESOURCE_URL")
+	currencyConverterURL := os.Getenv("CURRENCY_EXCHANGE_URL")
+	currencyConverterAPIKey := os.Getenv("CURRENCY_EXCHANGE_API_KEY")
+
 	httpClient := &http.Client{
 		Timeout: time.Second * 10,
 	}
 
-	webRepo := web_repo.New(httpClient, resourceURL)
-	orderUsecase := orderUsecase.New(webRepo)
-	orderHandlers := orderHandler.NewOrderHandler(orderUsecase)
+	// repository
+	webRepo := web_repo.New(httpClient, resourceURL, currencyConverterURL, currencyConverterAPIKey)
+	mapCache := cache.NewMapCache()
 
-	r := rest.NewRouter(orderHandlers)
+	// order domain
+	orderUsecase := orderUsecase.New(webRepo)
+	orderHandlers := handlers.NewOrderHandler(orderUsecase)
+
+	// currency converter domain
+	currencyConverterUsecase := currencyConverterUsecase.New(webRepo, mapCache)
+	currencyConverterHandlers := handlers.NewCurrencyConverterHandler(currencyConverterUsecase)
+
+	r := rest.NewRouter(orderHandlers, currencyConverterHandlers)
 	s := http.Server{
 		Addr:    restPort,
 		Handler: r,
