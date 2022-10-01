@@ -31,7 +31,7 @@ func RunRest() {
 	mapCache := cache.NewMapCache()
 
 	// order domain
-	orderUsecase := orderUsecase.New(webRepo)
+	orderUsecase := orderUsecase.New(webRepo, mapCache)
 	orderHandlers := handlers.NewOrderHandler(orderUsecase)
 
 	// currency converter domain

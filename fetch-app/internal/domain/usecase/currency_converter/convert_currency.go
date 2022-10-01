@@ -6,14 +6,12 @@ import (
 	"time"
 
 	"github.com/hengkysuryaa/backend-service/fetch-app/internal/domain/dto"
+	"github.com/hengkysuryaa/backend-service/fetch-app/internal/domain/entity"
 )
-
-var CURRENCY_CONVERSION_BASE_KEY = "currency-conversion:"
-var CACHE_EXPIRED_IN_HOUR = 2
 
 func (u *currencyConverter) ConvertCurrency(ctx context.Context, data dto.ConvertCurrencyRequest) (dto.ConvertCurrencyResponse, error) {
 	// first, get value of currency conversion from cache
-	val := u.cache.Get(CURRENCY_CONVERSION_BASE_KEY + data.From + data.To)
+	val := u.cache.Get(entity.CURRENCY_CONVERSION_BASE_KEY + data.From + data.To)
 	if val != nil {
 		// check cache expired time
 		currencyConversion := val.(dto.CurrencyConversionCache)
@@ -38,9 +36,9 @@ func (u *currencyConverter) ConvertCurrency(ctx context.Context, data dto.Conver
 	cacheVal := dto.CurrencyConversionCache{
 		Rate:          currencyConversion.Info.Rate,
 		FetchAtUnix:   int64(currencyConversion.Info.Timestamp),
-		ExpiredAtUnix: time.Now().UTC().Add(time.Hour * time.Duration(CACHE_EXPIRED_IN_HOUR)).Unix(),
+		ExpiredAtUnix: time.Now().UTC().Add(time.Hour * time.Duration(entity.CACHE_EXPIRED_IN_HOUR)).Unix(),
 	}
-	u.cache.Store(CURRENCY_CONVERSION_BASE_KEY+data.From+data.To, cacheVal)
+	u.cache.Store(entity.CURRENCY_CONVERSION_BASE_KEY+data.From+data.To, cacheVal)
 
 	return dto.ConvertCurrencyResponse{
 		Rate:          currencyConversion.Info.Rate,

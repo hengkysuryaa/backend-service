@@ -23,3 +23,15 @@ type OrderSummary struct {
 	Price        Stats     `json:"price"`
 	Size         Stats     `json:"size"`
 }
+
+type Order struct {
+	UUID         *string  `json:"uuid"`
+	Komoditas    *string  `json:"komoditas"`
+	AreaProvinsi *string  `json:"area_provinsi"`
+	AreaKota     *string  `json:"area_kota"`
+	Size         *string  `json:"size"`
+	IDRPrice     *float64 `json:"idr_price"`
+	USDPrice     *float64 `json:"usd_price"`
+	TglParsed    *string  `json:"tgl_parsed"`
+	Timestamp    *string  `json:"timestamp"`
+}
