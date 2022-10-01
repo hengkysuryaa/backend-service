@@ -31,7 +31,7 @@ func (u *order) GetSummary(ctx context.Context, filter dto.GetSummaryFilter) (dt
 		return dto.OrderSummary{}, err
 	}
 
-	for _, order := range orders {
+	for i, order := range orders {
 		// remove data outlier
 		if order.AreaProvinsi == nil || order.TglParsed == nil || order.Timestamp == nil {
 			continue
@@ -39,6 +39,14 @@ func (u *order) GetSummary(ctx context.Context, filter dto.GetSummaryFilter) (dt
 
 		if order.Price == nil || order.Size == nil {
 			continue
+		}
+
+		// seed first data
+		if i == 0 {
+			price, _ := strconv.ParseFloat(*order.Price, 64)
+			size, _ := strconv.ParseFloat(*order.Size, 64)
+			priceStats.Min = price
+			sizeStats.Min = size
 		}
 
 		// by area_provinsi and weekly range
