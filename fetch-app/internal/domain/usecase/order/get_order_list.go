@@ -2,8 +2,8 @@ package order
 
 import (
 	"context"
-	"log"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/hengkysuryaa/backend-service/fetch-app/internal/domain/dto"
@@ -11,18 +11,49 @@ import (
 )
 
 func (u *order) GetAll(ctx context.Context) ([]dto.Order, error) {
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	errChan := make(chan error, 2)
+	converterChan := make(chan dto.CurrencyConversionCache, 1)
+	orderChan := make(chan []entity.Order, 1)
+
 	// fetch currency conversion
-	currencyConversion, err := u.fetchCurrencyConversion(ctx, "IDR", "USD", 1)
-	if err != nil {
-		log.Println(err)
+	go func() {
+		defer wg.Done()
+		currencyConversion, err := u.fetchCurrencyConversion(ctx, "IDR", "USD", 1)
+		if err != nil {
+			errChan <- err
+			return
+		}
+
+		converterChan <- currencyConversion
+	}()
+
+	// fetch orders
+	go func() {
+		defer wg.Done()
+		orders, err := u.webRepo.GetOrders(ctx)
+		if err != nil {
+			errChan <- err
+			return
+		}
+
+		orderChan <- orders
+	}()
+
+	go func() {
+		wg.Wait()
+		close(errChan)
+	}()
+
+	// iterate over error channel
+	for err := range errChan {
 		return []dto.Order{}, err
 	}
 
-	orders, err := u.webRepo.GetOrders(ctx)
-	if err != nil {
-		log.Println(err)
-		return []dto.Order{}, err
-	}
+	// get data from channel
+	currencyConversion := <-converterChan
+	orders := <-orderChan
 
 	// iterate orders data
 	var ordersList []dto.Order
